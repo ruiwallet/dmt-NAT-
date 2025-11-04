@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dmt-NAT猜大小游戏</title>
+    <style>
+        :root {
+            --primary-color: #4a6cf7;
+            --secondary-color: #6a7dfe;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --dark-color: #343a40;
+            --light-color: #f8f9fa;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: var(--light-color);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #4a6cf7, #6a7dfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--secondary-color);
+        }
+
+        .wallet-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: var(--dark-color);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .account-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+        }
+
+        .bet-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .bet-options {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .bet-option {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .bet-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .bet-option.selected {
+            border-color: var(--primary-color);
+            background: rgba(74, 108, 247, 0.2);
+        }
+
+        .bet-option.big {
+            color: var(--success-color);
+        }
+
+        .bet-option.small {
+            color: var(--danger-color);
+        }
+
+        .bet-amount {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .amount-input {
+            padding: 12px 15px;
+            border: none;
+            border-radius: var(--border-radius);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+        }
+
+        .amount-input:focus {
+            outline: 2px solid var(--primary-color);
+        }
+
+        .amount-presets {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .amount-preset {
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .amount-preset:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .game-rules {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+        }
+
+        .game-rules h3 {
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+        }
+
+        .game-rules ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .game-rules li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .game-rules li:before {
+            content: "•";
+            color: var(--primary-color);
+            position: absolute;
+            left: 0;
+        }
+
+        .bet-history {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .bet-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+        }
+
+        .bet-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .bet-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .bet-amount-display {
+            font-weight: bold;
+        }
+
+        .bet-guess {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .bet-guess.big {
+            background: rgba(40, 167, 69, 0.2);
+            color: var(--success-color);
+        }
+
+        .bet-guess.small {
+            background: rgba(220, 53, 69, 0.2);
+            color: var(--danger-color);
+        }
+
+        .bet-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .bet-status.pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: var(--warning-color);
+        }
+
+        .bet-status.win {
+            background: rgba(40, 167, 69, 0.2);
+            color: var(--success-color);
+        }
+
+        .bet-status.lose {
+            background: rgba(220, 53, 69, 0.2);
+            color: var(--danger-color);
+        }
+
+        .bet-status.special {
+            background: rgba(108, 117, 125, 0.2);
+            color: var(--light-color);
+        }
+
+        .bet-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+        }
+
+        .alert-error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+        }
+
+        .alert-info {
+            background: rgba(23, 162, 184, 0.2);
+            border: 1px solid #17a2b8;
+            color: #17a2b8;
+        }
+
+        .digit-display {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .digit {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .digit.special {
+            background: rgba(108, 117, 125, 0.3);
+            color: var(--light-color);
+        }
+
+        .digit.big {
+            background: rgba(40, 167, 69, 0.3);
+            color: var(--success-color);
+        }
+
+        .digit.small {
+            background: rgba(220, 53, 69, 0.3);
+            color: var(--danger-color);
+        }
+
+        .digit-label {
+            text-align: center;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>dmt-NAT 猜大小游戏</h1>
+            <p class="subtitle">基于区块链的公平透明游戏体验</p>
+        </header>
+
+        <div id="alert" class="alert"></div>
+
+        <div class="main-content">
+            <div class="left-column">
+                <div class="card wallet-section">
+                    <h2>钱包连接</h2>
+                    <button id="connectWallet" class="btn btn-primary">连接钱包</button>
+
+                    <div id="accountInfo" class="account-info" style="display: none;">
+                        <div><strong>账户地址:</strong> <span id="accountAddress"></span></div>
+                        <div><strong>ETH 余额:</strong> <span id="ethBalance"></span></div>
+                        <div><strong>合约余额:</strong> <span id="contractBalance"></span></div>
+                        <div><strong>最大允许下注:</strong> <span id="maxAllowedBet"></span></div>
+                    </div>
+                </div>
+
+                <div class="card bet-section">
+                    <h2>下注</h2>
+
+                    <div class="bet-options">
+                        <div class="bet-option big" data-value="true">
+                            <h3>大</h3>
+                            <p>1, 3, 7, 9</p>
+                        </div>
+                        <div class="bet-option small" data-value="false">
+                            <h3>小</h3>
+                            <p>0, 2, 4, 6, 8</p>
+                        </div>
+                    </div>
+
+                    <div class="bet-amount">
+                        <label for="betAmount">下注金额 (ETH)</label>
+                        <input type="number" id="betAmount" class="amount-input" placeholder="0.01" min="0.001" step="0.001">
+
+                        <div class="amount-presets">
+                            <div class="amount-preset" data-amount="0.001">0.001</div>
+                            <div class="amount-preset" data-amount="0.01">0.01</div>
+                            <div class="amount-preset" data-amount="0.1">0.1</div>
+                            <div class="amount-preset" data-amount="0.5">0.5</div>
+                        </div>
+                    </div>
+
+                    <button id="placeBet" class="btn btn-primary" disabled>下注</button>
+
+                    <div class="game-rules">
+                        <h3>游戏规则</h3>
+                        <ul>
+                            <li>计算区块哈希后6位之和，取最后一位数字</li>
+                            <li>数字5为特殊数字，返还本金扣除2%税</li>
+                            <li>数字0,2,4,6,8为"小"</li>
+                            <li>数字1,3,7,9为"大"</li>
+                            <li>猜中赢家获得2倍奖金，扣除10%税</li>
+                            <li>猜错输家不返还下注金额</li>
+                            <li>单笔下注不能超过池子的2%</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-column">
+                <div class="card">
+                    <h2>数字分类</h2>
+                    <div class="digit-display">
+                        <div>
+                            <div class="digit small">0</div>
+                            <div class="digit-label">小</div>
+                        </div>
+                        <div>
+                            <div class="digit big">1</div>
+                            <div class="digit-label">大</div>
+                        </div>
+                        <div>
+                            <div class="digit small">2</div>
+                            <div class="digit-label">小</div>
+                        </div>
+                        <div>
+                            <div class="digit big">3</div>
+                            <div class="digit-label">大</div>
+                        </div>
+                        <div>
+                            <div class="digit small">4</div>
+                            <div class="digit-label">小</div>
+                        </div>
+                        <div>
+                            <div class="digit special">5</div>
+                            <div class="digit-label">特殊</div>
+                        </div>
+                        <div>
+                            <div class="digit small">6</div>
+                            <div class="digit-label">小</div>
+                        </div>
+                        <div>
+                            <div class="digit big">7</div>
+                            <div class="digit-label">大</div>
+                        </div>
+                        <div>
+                            <div class="digit small">8</div>
+                            <div class="digit-label">小</div>
+                        </div>
+                        <div>
+                            <div class="digit big">9</div>
+                            <div class="digit-label">大</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card bet-history">
+                    <h2>下注记录</h2>
+                    <div id="betHistory">
+                        <p style="text-align: center; opacity: 0.7;">暂无下注记录</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>基于以太坊区块链的猜大小游戏 | 公平透明 | 安全可靠</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+    <script>
+        // 合约ABI和地址
+        const CONTRACT_ABI = [
+            // 这里应该放置完整的合约ABI
+            // 由于ABI很长，实际部署时需要替换为完整的ABI
+            "function placeBet(bool _guess) external payable returns (uint256)",
+            "function settleBet(uint256 _betId) external",
+            "function getBetInfo(uint256 _betId) external view returns (address, uint256, bool, uint256, uint8, bool, uint256, uint256, uint256)",
+            "function getContractBalance() external view returns (uint256)",
+            "function getMaxAllowedBet() external view returns (uint256)",
+            "function betCounter() external view returns (uint256)",
+            "function bets(uint256) external view returns (address, uint256, bool, uint256, uint8, bool, uint256)"
+        ];
+
+        const CONTRACT_ADDRESS = "YOUR_CONTRACT_ADDRESS_HERE"; // 替换为实际合约地址
+
+        // 全局变量
+        let provider;
+        let signer;
+        let contract;
+        let userAddress;
+        let userBets = [];
+
+        // DOM元素
+        const connectWalletBtn = document.getElementById('connectWallet');
+        const accountInfo = document.getElementById('accountInfo');
+        const accountAddress = document.getElementById('accountAddress');
+        const ethBalance = document.getElementById('ethBalance');
+        const contractBalance = document.getElementById('contractBalance');
+        const maxAllowedBet = document.getElementById('maxAllowedBet');
+        const betOptions = document.querySelectorAll('.bet-option');
+        const betAmountInput = document.getElementById('betAmount');
+        const amountPresets = document.querySelectorAll('.amount-preset');
+        const placeBetBtn = document.getElementById('placeBet');
+        const betHistory = document.getElementById('betHistory');
+        const alertBox = document.getElementById('alert');
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查是否已安装MetaMask
+            if (typeof window.ethereum !== 'undefined') {
+                console.log('MetaMask 已安装');
+                initApp();
+            } else {
+                showAlert('请安装 MetaMask 钱包以使用此应用', 'error');
+                connectWalletBtn.textContent = '请安装 MetaMask';
+                connectWalletBtn.disabled = true;
+            }
+        });
+
+        // 初始化应用
+        async function initApp() {
+            connectWalletBtn.addEventListener('click', connectWallet);
+
+            // 设置下注选项点击事件
+            betOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    betOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    updatePlaceBetButton();
+                });
+            });
+
+            // 设置金额预设点击事件
+            amountPresets.forEach(preset => {
+                preset.addEventListener('click', function() {
+                    const amount = this.getAttribute('data-amount');
+                    betAmountInput.value = amount;
+                    updatePlaceBetButton();
+                });
+            });
+
+            // 设置金额输入事件
+            betAmountInput.addEventListener('input', updatePlaceBetButton);
+
+            // 设置下注按钮事件
+            placeBetBtn.addEventListener('click', placeBet);
+        }
+
+        // 连接钱包
+        async function connectWallet() {
+            try {
+                connectWalletBtn.innerHTML = '<div class="loading"></div> 连接中...';
+
+                // 请求账户访问
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+                // 创建提供者和签名者
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+
+                // 创建合约实例
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+                // 更新UI
+                updateAccountInfo();
+
+                // 监听账户变化
+                window.ethereum.on('accountsChanged', function(accounts) {
+                    if (accounts.length === 0) {
+                        // 用户断开连接
+                        resetUI();
+                    } else {
+                        // 用户切换账户
+                        userAddress = accounts[0];
+                        updateAccountInfo();
+                    }
+                });
+
+                // 监听网络变化
+                window.ethereum.on('chainChanged', function(chainId) {
+                    // 重新加载页面
+                    window.location.reload();
+                });
+
+                showAlert('钱包连接成功', 'success');
+            } catch (error) {
+                console.error('连接钱包失败:', error);
+                showAlert('连接钱包失败: ' + error.message, 'error');
+                connectWalletBtn.textContent = '连接钱包';
+            }
+        }
+
+        // 更新账户信息
+        async function updateAccountInfo() {
+            try {
+                // 更新账户地址
+                const shortAddress = userAddress.substring(0, 6) + '...' + userAddress.substring(userAddress.length - 4);
+                accountAddress.textContent = shortAddress;
+
+                // 更新ETH余额
+                const balance = await provider.getBalance(userAddress);
+                const ethBalanceFormatted = ethers.utils.formatEther(balance);
+                ethBalance.textContent = parseFloat(ethBalanceFormatted).toFixed(4) + ' ETH';
+
+                // 更新合约余额
+                const contractBal = await contract.getContractBalance();
+                const contractBalFormatted = ethers.utils.formatEther(contractBal);
+                contractBalance.textContent = parseFloat(contractBalFormatted).toFixed(4) + ' ETH';
+
+                // 更新最大允许下注
+                const maxBet = await contract.getMaxAllowedBet();
+                const maxBetFormatted = ethers.utils.formatEther(maxBet);
+                maxAllowedBet.textContent = parseFloat(maxBetFormatted).toFixed(4) + ' ETH';
+
+                // 显示账户信息
+                accountInfo.style.display = 'flex';
+                connectWalletBtn.textContent = '已连接';
+                connectWalletBtn.disabled = true;
+
+                // 加载用户下注记录
+                loadUserBets();
+            } catch (error) {
+                console.error('更新账户信息失败:', error);
+                showAlert('获取账户信息失败: ' + error.message, 'error');
+            }
+        }
+
+        // 更新下注按钮状态
+        function updatePlaceBetButton() {
+            const selectedOption = document.querySelector('.bet-option.selected');
+            const amount = betAmountInput.value;
+
+            if (selectedOption && amount && parseFloat(amount) >= 0.001) {
+                placeBetBtn.disabled = false;
+            } else {
+                placeBetBtn.disabled = true;
+            }
+        }
+
+        // 下注
+        async function placeBet() {
+            try {
+                const selectedOption = document.querySelector('.bet-option.selected');
+                const guess = selectedOption.getAttribute('data-value') === 'true';
+                const amount = betAmountInput.value;
+
+                placeBetBtn.innerHTML = '<div class="loading"></div> 下注中...';
+                placeBetBtn.disabled = true;
+
+                // 发送交易
+                const tx = await contract.placeBet(guess, {
+                    value: ethers.utils.parseEther(amount)
+                });
+
+                showAlert('交易已发送，等待确认...', 'info');
+
+                // 等待交易确认
+                const receipt = await tx.wait();
+
+                showAlert('下注成功!', 'success');
+
+                // 重置UI
+                placeBetBtn.textContent = '下注';
+                placeBetBtn.disabled = false;
+                betAmountInput.value = '';
+                betOptions.forEach(opt => opt.classList.remove('selected'));
+
+                // 重新加载下注记录
+                loadUserBets();
+                updateAccountInfo();
+            } catch (error) {
+                console.error('下注失败:', error);
+                showAlert('下注失败: ' + error.message, 'error');
+                placeBetBtn.textContent = '下注';
+                placeBetBtn.disabled = false;
+            }
+        }
+
+        // 开奖
+        async function settleBet(betId) {
+            try {
+                const settleBtn = document.getElementById(`settle-${betId}`);
+                settleBtn.innerHTML = '<div class="loading"></div> 开奖中...';
+                settleBtn.disabled = true;
+
+                const tx = await contract.settleBet(betId);
+                showAlert('开奖交易已发送，等待确认...', 'info');
+
+                const receipt = await tx.wait();
+                showAlert('开奖成功!', 'success');
+
+                // 重新加载下注记录
+                loadUserBets();
+                updateAccountInfo();
+            } catch (error) {
+                console.error('开奖失败:', error);
+                showAlert('开奖失败: ' + error.message, 'error');
+            }
+        }
+
+        // 加载用户下注记录
+        async function loadUserBets() {
+            try {
+                const betCounter = await contract.betCounter();
+                userBets = [];
+
+                // 由于查询所有下注可能很慢，这里只查询最近20个下注
+                const startId = Math.max(1, betCounter - 19);
+
+                for (let i = betCounter; i >= startId; i--) {
+                    try {
+                        const bet = await contract.bets(i);
+                        if (bet.player === userAddress) {
+                            userBets.push({
+                                id: i,
+                                player: bet.player,
+                                amount: bet.amount,
+                                guess: bet.guess,
+                                blockNumber: bet.blockNumber,
+                                status: bet.status,
+                                settled: bet.settled,
+                                payout: bet.payout,
+                                result: bet.result,
+                                lastDigit: bet.lastDigit
+                            });
+                        }
+                    } catch (error) {
+                        // 跳过不存在的下注
+                        console.log(`下注 ${i} 不存在`);
+                    }
+                }
+
+                displayUserBets();
+            } catch (error) {
+                console.error('加载下注记录失败:', error);
+            }
+        }
+
+        // 显示用户下注记录
+        function displayUserBets() {
+            if (userBets.length === 0) {
+                betHistory.innerHTML = '<p style="text-align: center; opacity: 0.7;">暂无下注记录</p>';
+                return;
+            }
+
+            betHistory.innerHTML = '';
+
+            userBets.forEach(bet => {
+                const betElement = document.createElement('div');
+                betElement.className = 'bet-item';
+
+                const guessText = bet.guess ? '大' : '小';
+                const guessClass = bet.guess ? 'big' : 'small';
+
+                let statusText = '';
+                let statusClass = '';
+
+                switch (bet.status) {
+                    case 0: // Pending
+                        statusText = '等待开奖';
+                        statusClass = 'pending';
+                        break;
+                    case 1: // Win
+                        statusText = '获胜';
+                        statusClass = 'win';
+                        break;
+                    case 2: // Lose
+                        statusText = '失败';
+                        statusClass = 'lose';
+                        break;
+                    case 3: // Special
+                        statusText = '特殊';
+                        statusClass = 'special';
+                        break;
+                }
+
+                const amountFormatted = ethers.utils.formatEther(bet.amount);
+                const payoutFormatted = ethers.utils.formatEther(bet.payout);
+
+                betElement.innerHTML = `
+                    <div class="bet-info">
+                        <div class="bet-amount-display">${parseFloat(amountFormatted).toFixed(4)} ETH</div>
+                        <div>猜 <span class="bet-guess ${guessClass}">${guessText}</span></div>
+                        <div>状态: <span class="bet-status ${statusClass}">${statusText}</span></div>
+                        ${bet.settled && bet.payout > 0 ? `<div>奖金: ${parseFloat(payoutFormatted).toFixed(4)} ETH</div>` : ''}
+                        ${bet.result > 0 ? `<div>结果: ${bet.result} (最后一位: ${bet.lastDigit})</div>` : ''}
+                    </div>
+                    <div class="bet-actions">
+                        ${!bet.settled && bet.blockNumber < (await provider.getBlockNumber()) ? 
+                            `<button id="settle-${bet.id}" class="btn btn-warning" onclick="settleBet(${bet.id})">开奖</button>` : 
+                            ''
+                        }
+                    </div>
+                `;
+
+                betHistory.appendChild(betElement);
+            });
+        }
+
+        // 显示提示信息
+        function showAlert(message, type) {
+            alertBox.textContent = message;
+            alertBox.className = 'alert';
+
+            switch (type) {
+                case 'success':
+                    alertBox.classList.add('alert-success');
+                    break;
+                case 'error':
+                    alertBox.classList.add('alert-error');
+                    break;
+                case 'info':
+                    alertBox.classList.add('alert-info');
+                    break;
+            }
+
+            alertBox.style.display = 'block';
+
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 3000);
+        }
+
+        // 重置UI
+        function resetUI() {
+            accountInfo.style.display = 'none';
+            connectWalletBtn.textContent = '连接钱包';
+            connectWalletBtn.disabled = false;
+            betHistory.innerHTML = '<p style="text-align: center; opacity: 0.7;">暂无下注记录</p>';
+            betAmountInput.value = '';
+            betOptions.forEach(opt => opt.classList.remove('selected'));
+            placeBetBtn.disabled = true;
+        }
+    </script>
+</body>
+</html>
